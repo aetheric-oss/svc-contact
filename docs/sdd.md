@@ -1,4 +1,4 @@
-# Software Design Document (SDD) - `svc-FIXME` 
+# Software Design Document (SDD) - `svc-contact` 
 
 <center>
 
@@ -8,9 +8,9 @@
 
 ## Overview
 
-This document details the software implementation of FIXME.
+This document details the software implementation of `svc-contact`.
 
-This service is responsible for FIXME
+This service takes requests from other microservices to send transactional information to a user (e.g. flight confirmations). It connects to external email and SMS services.
 
 Attribute | Description
 --- | ---
@@ -22,9 +22,9 @@ Document | Description
 --- | ---
 [High-Level Concept of Operations (CONOPS)](https://github.com/Arrow-air/se-services/blob/develop/docs/conops.md) | Overview of Arrow microservices.
 [High-Level Interface Control Document (ICD)](https://github.com/Arrow-air/se-services/blob/develop/docs/icd.md)  | Interfaces and frameworks common to all Arrow microservices.
-[Requirements - `svc-FIXME`](FIXME - generate a link specifically for this module's view in NocoDB) | Requirements and user stories for this microservice.
-[Concept of Operations - `svc-FIXME`](./conops.md) | Defines the motivation and duties of this microservice.
-[Interface Control Document (ICD) - `svc-FIXME`](./icd.md) | Defines the inputs and outputs of this microservice.
+[Requirements - `svc-contact`](https://nocodb.arrowair.com/dashboard/#/nc/view/a2df942d-fcd7-47c0-9d8b-83b7df5698d1) | Requirements and user stories for this microservice.
+[Concept of Operations - `svc-contact`](./conops.md) | Defines the motivation and duties of this microservice.
+[Interface Control Document (ICD) - `svc-contact`](./icd.md) | Defines the inputs and outputs of this microservice.
 
 ## Module Attributes
 
