@@ -1,4 +1,4 @@
-# Concept of Operations - `svc-FIXME`
+# Concept of Operations - `svc-contact`
 
 <center>
 
@@ -10,12 +10,10 @@ Attribute | Description
 --- | ---
 Maintainer | [@Arrow-air/services](https://github.com/orgs/Arrow-air/teams)
 Status | Draft
-  
-FIXME: Some of the headings below may not apply to your microservice. Remove if so.
 
 ## Overview
 
-FIXME - What does this microservice do, in brief?
+This service takes requests from other microservices to send transactional information to a user (e.g. flight confirmations). It connects to external email and SMS services.
 
 ## Related Documents
 
@@ -23,9 +21,9 @@ Document | Description
 --- | ---
 [High-Level Concept of Operations (CONOPS)](https://github.com/Arrow-air/se-services/blob/develop/docs/conops.md) | Overview of Arrow microservices.
 [High-Level Interface Control Document (ICD)](https://github.com/Arrow-air/se-services/blob/develop/docs/icd.md)  | Interfaces and frameworks common to all Arrow microservices.
-[Requirements - `svc-FIXME`](FIXME - generate a link specifically for this module's view in NocoDB) | Requirements and user stories for this microservice.
-[Interface Control Document (ICD) - `svc-FIXME`](./icd.md) | Defines the inputs and outputs of this microservice.
-[Software Design Document (SDD) - `svc-FIXME`](./sdd.md) | Specifies the internal activity of this microservice.
+[Requirements - `svc-contact`](https://nocodb.arrowair.com/dashboard/#/nc/view/a2df942d-fcd7-47c0-9d8b-83b7df5698d1) | Requirements and user stories for this microservice.
+[Interface Control Document (ICD) - `svc-contact`](./icd.md) | Defines the inputs and outputs of this microservice.
+[Software Design Document (SDD) - `svc-contact`](./sdd.md) | Specifies the internal activity of this microservice.
 
 ## Motivation
 
