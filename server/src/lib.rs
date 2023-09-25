@@ -23,6 +23,6 @@ pub mod grpc;
 pub async fn shutdown_signal(server: &str) {
     tokio::signal::ctrl_c()
         .await
-        .expect("expect tokio signal ctrl-c");
-    grpc_warn!("({}) shutdown signal", server);
+        .expect("expect tokio signal ctrl-c.");
+    grpc_warn!("({}) shutdown signal.", server);
 }

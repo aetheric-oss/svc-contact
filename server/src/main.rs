@@ -22,6 +22,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let _ = tokio::spawn(grpc::server::grpc_server(config)).await;
 
-    info!("Server shutdown.");
+    info!("(main) server shutdown.");
     Ok(())
 }
