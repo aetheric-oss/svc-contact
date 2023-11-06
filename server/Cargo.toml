@@ -1,43 +1,59 @@
 [package]
-description = "Arrow contact service GRPC server"
+description = "Arrow contact service gRPC server"
+keywords    = ["vtol", "server", "grpc", "rest", "contact"] # max 5
 name        = "svc-contact"
 version     = "0.0.2-develop.0"
 
+authors.workspace      = true
 categories.workspace   = true
 edition.workspace      = true
 homepage.workspace     = true
-keywords.workspace     = true
 license-file.workspace = true
 repository.workspace   = true
 
 [features]
-vendored-openssl = ['openssl/vendored']
+default          = []
+dev              = ["mock"]
+test_util        = ["mock", "stub_backends"]
+vendored-openssl = ["openssl/vendored"]
+# Will add a 'mock' module for the enabled resources, providing access to mock data generation functions
+mock = []
+# Will use a stubbed backend connection, only use for tests!
+stub_backends = ["svc-storage-client-grpc/stub_client"]
+# Will implement stub functions for the server, only use for tests!
+stub_server = ["test_util"]
+# Only added to support client-grpc feature when running tests
+stub_client = ["stub_backends"]
 
 [dependencies]
 anyhow       = "1.0"
-axum         = "0.6"
+axum         = "0.5"
 cargo-husky  = "1"
 chrono       = { version = "0.4", features = ["serde"] }
-clap         = { version = "4.0", features = ["derive"] }
+clap         = { version = "4.4", features = ["derive"] }
 config       = "0.13"
 dotenv       = "0.15"
-futures      = "0.3"
 hyper        = "0.14"
 log          = "0.4"
 openssl      = "0.10"
-prost        = "0.11"
-prost-build  = "0.11"
-prost-types  = "0.11"
+prost        = "0.12"
 serde        = "1.0"
 serde_json   = "1.0"
-tokio        = { version = "1.20", features = ["full"] }
+tokio        = { version = "1.33", features = ["full"] }
 tokio-util   = "0.7"
-tonic        = "0.8"
-tonic-health = "0.8"
+tonic        = "0.10"
+tonic-health = "0.10"
+tower        = { version = "0.4", features = ["limit"] }
+tower-http   = { version = "0.4", features = ["cors", "trace"] }
 
-[dependencies.utoipa]
-features = ["axum_extras", "chrono"]
-version  = "3.1"
+[dependencies.svc-storage-client-grpc]
+features = ["user"]
+git      = "https://github.com/Arrow-air/svc-storage"
+tag      = "latest-develop"
+
+[dependencies.lib-common]
+git = "https://github.com/Arrow-air/lib-common"
+tag = "latest-develop"
 
 [dependencies.log4rs]
 features = [
@@ -48,10 +64,22 @@ features = [
 ]
 version = "1.2"
 
+[dependencies.utoipa]
+features = ["axum_extras", "chrono"]
+version  = "4.0"
+
+[dev-dependencies]
+logtest = "2.0"
+
 [dev-dependencies.cargo-husky]
 default-features = false          # Disable features which are enabled by default
 features         = ["user-hooks"]
 version          = "1"
 
+# Make sure we enable the required modules when running tests
+[dev-dependencies.svc-contact]
+features = ["dev"]
+path     = "."
+
 [build-dependencies]
-tonic-build = "0.8"
+tonic-build = "0.10"
