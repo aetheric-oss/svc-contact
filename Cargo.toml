@@ -1,10 +1,11 @@
 [workspace]
-members = ["server", "client-grpc"]
+members  = ["server", "client-grpc", "client-rest"]
+resolver = "2"
 
 [workspace.package]
+authors      = ["arrow-services <group-services@arrowair.com>"]
 edition      = "2021"
 homepage     = "https://www.arrowair.com/docs/documentation/services/intro"
-keywords     = ["vtol", "server", "contact"]                                # max 5
 license-file = "LICENSE"
 repository   = "https://github.com/Arrow-air/svc-contact"
 
