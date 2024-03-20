@@ -139,32 +139,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "arrow-macros-core"
-version = "0.2.1-develop.0"
-source = "git+https://github.com/Arrow-air/lib-common?tag=v0.2.1-develop.0#ab297fda939b316ad4778dba2711e626246e048b"
-dependencies = [
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 2.0.39",
-]
-
-[[package]]
 name = "arrow-macros-derive"
 version = "0.2.1-develop.0"
 source = "git+https://github.com/Arrow-air/lib-common?tag=latest-develop#4ccaa5c1e59f5c8dc2a5efd97b7f17e0e6fa1692"
 dependencies = [
- "arrow-macros-core 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=latest-develop)",
- "proc-macro-error",
- "proc-macro2",
-]
-
-[[package]]
-name = "arrow-macros-derive"
-version = "0.2.1-develop.0"
-source = "git+https://github.com/Arrow-air/lib-common?tag=v0.2.1-develop.0#ab297fda939b316ad4778dba2711e626246e048b"
-dependencies = [
- "arrow-macros-core 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=v0.2.1-develop.0)",
+ "arrow-macros-core",
  "proc-macro-error",
  "proc-macro2",
 ]
@@ -1065,7 +1044,7 @@ name = "lib-common"
 version = "0.2.1-develop.0"
 source = "git+https://github.com/Arrow-air/lib-common?tag=latest-develop#4ccaa5c1e59f5c8dc2a5efd97b7f17e0e6fa1692"
 dependencies = [
- "arrow-macros-derive 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=latest-develop)",
+ "arrow-macros-derive",
  "cargo-husky",
  "chrono",
  "futures",
@@ -1077,22 +1056,6 @@ dependencies = [
  "tokio",
  "tonic",
  "tower",
- "trybuild",
-]
-
-[[package]]
-name = "lib-common"
-version = "0.2.1-develop.0"
-source = "git+https://github.com/Arrow-air/lib-common?tag=v0.2.1-develop.0#ab297fda939b316ad4778dba2711e626246e048b"
-dependencies = [
- "arrow-macros-derive 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=v0.2.1-develop.0)",
- "cargo-husky",
- "chrono",
- "futures",
- "log",
- "prost",
- "prost-wkt-types",
- "tonic",
  "trybuild",
 ]
 
@@ -2128,7 +2091,7 @@ dependencies = [
  "config",
  "dotenv",
  "hyper",
- "lib-common 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=latest-develop)",
+ "lib-common",
  "log",
  "log4rs",
  "logtest",
@@ -2153,7 +2116,7 @@ name = "svc-contact-client-grpc"
 version = "0.0.2-develop.1"
 dependencies = [
  "cfg-if",
- "lib-common 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=latest-develop)",
+ "lib-common",
  "log",
  "logtest",
  "prost",
@@ -2170,7 +2133,7 @@ version = "0.0.2-develop.1"
 dependencies = [
  "chrono",
  "hyper",
- "lib-common 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=latest-develop)",
+ "lib-common",
  "serde",
  "serde_json",
  "tokio",
@@ -2180,8 +2143,8 @@ dependencies = [
 
 [[package]]
 name = "svc-storage"
-version = "0.11.1-develop.2"
-source = "git+https://github.com/Arrow-air/svc-storage?tag=latest-develop#2f71c07bf4031a73c9f382bf863ea498b2eea27d"
+version = "0.11.1-develop.9"
+source = "git+https://github.com/Arrow-air/svc-storage?tag=latest-develop#0b199bc70a13bb1c8c9e6ce828da5fc370764cd0"
 dependencies = [
  "anyhow",
  "byteorder",
@@ -2198,7 +2161,7 @@ dependencies = [
  "geo-types",
  "hyper",
  "lazy_static",
- "lib-common 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=v0.2.1-develop.0)",
+ "lib-common",
  "log",
  "log4rs",
  "native-tls",
@@ -2228,15 +2191,15 @@ dependencies = [
 
 [[package]]
 name = "svc-storage-client-grpc"
-version = "0.11.1-develop.2"
-source = "git+https://github.com/Arrow-air/svc-storage?tag=latest-develop#2f71c07bf4031a73c9f382bf863ea498b2eea27d"
+version = "0.11.1-develop.9"
+source = "git+https://github.com/Arrow-air/svc-storage?tag=latest-develop#0b199bc70a13bb1c8c9e6ce828da5fc370764cd0"
 dependencies = [
  "anyhow",
  "cfg-if",
  "futures",
  "geo-types",
  "lazy_static",
- "lib-common 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=v0.2.1-develop.0)",
+ "lib-common",
  "log",
  "num-derive",
  "num-traits",

@@ -11,11 +11,11 @@ use utoipa::OpenApi;
 #[derive(OpenApi)]
 #[openapi(
     paths(
-        // rest_api::query_flight
+        api::signup
     ),
     components(
         schemas(
-            api::rest_types::ExampleRequest
+            api::rest_types::SignupRequest
         )
     ),
     tags(
