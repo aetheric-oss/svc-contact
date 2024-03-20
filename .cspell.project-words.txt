@@ -30,3 +30,5 @@ dotenv
 NocoDB
 logtest
 oneshot
+seccomp
+Lcov
