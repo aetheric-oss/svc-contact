@@ -78,7 +78,7 @@ pub async fn rest_server(
     //
     let app = Router::new()
         .route("/health", routing::get(api::health_check)) // MUST HAVE
-        .route("/template/example", routing::post(api::example))
+        .route("/contact/signup", routing::post(api::signup))
         .layer(
             CorsLayer::new()
                 .allow_origin(cors_allowed_origin)

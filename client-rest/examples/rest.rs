@@ -1,6 +1,5 @@
 //! Example communication with this service
 
-use chrono::Utc;
 use hyper::{Body, Client, Method, Request, Response};
 use hyper::{Error, StatusCode};
 use lib_common::grpc::get_endpoint_from_env;
@@ -41,13 +40,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // POST /template/example
     {
-        let data = ExampleRequest {
-            id: "abcdef12".to_string(),
-            timestamp: Utc::now(),
+        let data = SignupRequest {
+            display_name: "abcdef12".to_string(),
+            email: "example@aetheric.nl".to_string(),
         };
 
         let data_str = serde_json::to_string(&data).unwrap();
-        let uri = format!("{}/template/example", url);
+        let uri = format!("{}/contact/signup", url);
         let req = Request::builder()
             .method(Method::POST)
             .uri(uri.clone())
