@@ -10,7 +10,7 @@ use crate::grpc::client::GrpcClients;
 use axum::{extract::Extension, Json};
 use hyper::StatusCode;
 
-use svc_storage_client_grpc::prelude::*;
+use svc_storage_client_grpc::prelude::{user::AuthMethod, *};
 // gRPC client types
 // use svc_scheduler_client_grpc::prelude::*;
 // ...
@@ -60,61 +60,52 @@ pub async fn health_check(
     }
 }
 
+impl From<SignupRequest> for user::Data {
+    fn from(req: SignupRequest) -> Self {
+        user::Data {
+            auth_method: AuthMethod::Local.into(), // TODO(R5): Update this with the right auth method
+            display_name: req.display_name,
+            email: req.email,
+        }
+    }
+}
+
 /// Example REST API function
 #[utoipa::path(
     post,
-    path = "/template/example",
+    path = "/contact/signup",
     tag = "svc-contact",
-    request_body = ExampleRequest,
+    request_body = SignupRequest,
     responses(
         (status = 200, description = "Request successful.", body = String),
         (status = 500, description = "Request unsuccessful."),
     )
 )]
-pub async fn example(
-    Extension(mut _grpc_clients): Extension<GrpcClients>,
-    Json(payload): Json<ExampleRequest>,
+pub async fn signup(
+    Extension(grpc_clients): Extension<GrpcClients>,
+    Json(payload): Json<SignupRequest>,
 ) -> Result<Json<String>, StatusCode> {
-    rest_debug!("(query_vertiports) entry.");
+    rest_debug!("(signup) entry.");
 
-    // Example request to outside gRPC client
+    let data: user::Data = payload.into();
+    let user_id = grpc_clients
+        .storage
+        .user
+        .insert(data)
+        .await
+        .map_err(|e| {
+            rest_error!("(signup) failed to insert user: {}.", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?
+        .into_inner()
+        .object
+        .ok_or_else(|| {
+            rest_error!("(signup) failed to insert user: no user object returned.");
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?
+        .id;
 
-    // // Build request
-    // let degree_range: f32 = 2.0;
-    // let filter = AdvancedSearchFilter::search_between(
-    //     "latitude".to_owned(),
-    //     (payload.latitude + degree_range).to_string(),
-    //     (payload.latitude - degree_range).to_string(),
-    // )
-    // .and_between(
-    //     "longitude".to_owned(),
-    //     (payload.longitude + degree_range).to_string(),
-    //     (payload.longitude - degree_range).to_string(),
-    // );
-    // let request = tonic::Request::new(filter);
-
-    // // Get client
-    // let result = grpc_clients.storage.get_client().await;
-    // let Some(mut client) = result else {
-    //     let error_msg = "svc-storage unavailable.".to_string();
-    //     rest_error!("(query_vertiports) {}", &error_msg);
-    //     return Err(StatusCode::SERVICE_UNAVAILABLE);
-    // };
-
-    // // Make request, process response
-    // let response = client.search(request).await;
-    // match response {
-    //     Ok(response) => {
-    //         rest_info!("(example) response: {:?}", response);
-    //         Ok(Json(format!("{}!", payload.id)))
-    //     }
-    //     Err(e) => {
-    //         rest_error!("(example) error: {}", e);
-    //         Err(StatusCode::INTERNAL_SERVER_ERROR)
-    //     }
-    // }
-
-    Ok(Json(format!("{}!", payload.id)))
+    Ok(Json(user_id))
 }
 
 #[cfg(test)]
