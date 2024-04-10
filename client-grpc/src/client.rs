@@ -9,7 +9,7 @@ use lib_common::grpc::ClientConnect;
 use lib_common::grpc::{Client, GrpcClient};
 use rpc_service_client::RpcServiceClient;
 /// GrpcClient implementation of the RpcServiceClient
-pub type TemplateRustClient = GrpcClient<RpcServiceClient<Channel>>;
+pub type ContactClient = GrpcClient<RpcServiceClient<Channel>>;
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "stub_backends")] {
@@ -24,9 +24,11 @@ cfg_if::cfg_if! {
 
 #[cfg(not(feature = "stub_client"))]
 #[async_trait]
-impl crate::service::Client<RpcServiceClient<Channel>> for TemplateRustClient {
+impl crate::service::Client<RpcServiceClient<Channel>> for ContactClient {
     type ReadyRequest = ReadyRequest;
     type ReadyResponse = ReadyResponse;
+    type CargoConfirmationRequest = CargoConfirmationRequest;
+    type CargoConfirmationResponse = CargoConfirmationResponse;
 
     async fn is_ready(
         &self,
@@ -36,13 +38,24 @@ impl crate::service::Client<RpcServiceClient<Channel>> for TemplateRustClient {
         grpc_debug!("(is_ready) request: {:?}", request);
         self.get_client().await?.is_ready(request).await
     }
+
+    async fn cargo_confirmation(
+        &self,
+        request: Self::CargoConfirmationRequest,
+    ) -> Result<tonic::Response<Self::CargoConfirmationResponse>, tonic::Status> {
+        grpc_info!("(cargo_confirmation) {} client.", self.get_name());
+        grpc_debug!("(cargo_confirmation) request: {:?}", request);
+        self.get_client().await?.cargo_confirmation(request).await
+    }
 }
 
 #[cfg(feature = "stub_client")]
 #[async_trait]
-impl crate::service::Client<RpcServiceClient<Channel>> for TemplateRustClient {
+impl crate::service::Client<RpcServiceClient<Channel>> for ContactClient {
     type ReadyRequest = ReadyRequest;
     type ReadyResponse = ReadyResponse;
+    type CargoConfirmationRequest = CargoConfirmationRequest;
+    type CargoConfirmationResponse = CargoConfirmationResponse;
 
     async fn is_ready(
         &self,
@@ -51,6 +64,17 @@ impl crate::service::Client<RpcServiceClient<Channel>> for TemplateRustClient {
         grpc_warn!("(is_ready MOCK) {} client.", self.get_name());
         grpc_debug!("(is_ready MOCK) request: {:?}", request);
         Ok(tonic::Response::new(ReadyResponse { ready: true }))
+    }
+
+    async fn cargo_confirmation(
+        &self,
+        request: Self::CargoConfirmationRequest,
+    ) -> Result<tonic::Response<Self::CargoConfirmationResponse>, tonic::Status> {
+        grpc_warn!("(cargo_confirmation MOCK) {} client.", self.get_name());
+        grpc_debug!("(cargo_confirmation MOCK) request: {:?}", request);
+        Ok(tonic::Response::new(CargoConfirmationResponse {
+            success: true,
+        }))
     }
 }
 
@@ -67,7 +91,7 @@ mod tests {
         let (server_host, server_port) =
             lib_common::grpc::get_endpoint_from_env("GRPC_HOST", "GRPC_PORT");
 
-        let client: TemplateRustClient = GrpcClient::new_client(&server_host, server_port, name);
+        let client: ContactClient = GrpcClient::new_client(&server_host, server_port, name);
         assert_eq!(client.get_name(), name);
 
         let connection = client.get_client().await;
@@ -81,7 +105,7 @@ mod tests {
         let (server_host, server_port) =
             lib_common::grpc::get_endpoint_from_env("GRPC_HOST", "GRPC_PORT");
 
-        let client: TemplateRustClient = GrpcClient::new_client(&server_host, server_port, name);
+        let client: ContactClient = GrpcClient::new_client(&server_host, server_port, name);
         assert_eq!(client.get_name(), name);
 
         let result = client.is_ready(ReadyRequest {}).await;

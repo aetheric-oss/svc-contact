@@ -7,7 +7,7 @@ use svc_contact_client_grpc::prelude::*;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (host, port) = get_endpoint_from_env("SERVER_HOSTNAME", "SERVER_PORT_GRPC");
-    let client = TemplateRustClient::new_client(&host, port, "contact");
+    let client = ContactClient::new_client(&host, port, "contact");
     println!("Client created.");
     println!(
         "NOTE: Ensure the server is running on {} or this example will fail.",

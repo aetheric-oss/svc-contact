@@ -8,7 +8,8 @@ use svc_contact::*;
 #[cfg(not(tarpaulin_include))]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Will use default config settings if no environment vars are found.
-    let config = Config::try_from_env().unwrap_or_default();
+    let config = Config::try_from_env()
+        .map_err(|e| format!("Failed to load configuration from environment: {}", e))?;
 
     // Try to load log configuration from the provided log file.
     // Will default to stdout debug logging if the file can not be loaded.
@@ -25,6 +26,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(target) = args.openapi {
         return rest::generate_openapi_spec(&target);
     }
+
+    grpc::api::cargo::POSTMARK_TOKEN
+        .set(config.postmark_token.clone())
+        .map_err(|_| "Failed to set POSTMARK_TOKEN")?;
 
     tokio::spawn(rest::server::rest_server(config.clone(), None));
 

@@ -32,3 +32,7 @@ logtest
 oneshot
 seccomp
 Lcov
+reqwest
+polyline
+timeslot
+dropoff
