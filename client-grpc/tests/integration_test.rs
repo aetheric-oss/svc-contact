@@ -24,7 +24,7 @@ async fn test_client_requests_and_logs() {
     let (server_host, server_port) =
         lib_common::grpc::get_endpoint_from_env("GRPC_HOST", "GRPC_PORT");
 
-    let client = TemplateRustClient::new_client(&server_host, server_port, name);
+    let client = ContactClient::new_client(&server_host, server_port, name);
 
     // Start the logger.
     let mut logger = Logger::start();

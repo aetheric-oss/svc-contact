@@ -26,6 +26,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         return rest::generate_openapi_spec(&target);
     }
 
+    grpc::api::cargo::POSTMARK_TOKEN
+        .set(config.postmark_token.clone())
+        .map_err(|_| "Failed to set POSTMARK_TOKEN")?;
+
     tokio::spawn(rest::server::rest_server(config.clone(), None));
 
     tokio::spawn(grpc::server::grpc_server(config, None)).await?;

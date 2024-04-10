@@ -6,6 +6,7 @@ mod grpc_server {
     tonic::include_proto!("grpc");
 }
 pub use grpc_server::rpc_service_server::{RpcService, RpcServiceServer};
+pub use grpc_server::{CargoConfirmationRequest, CargoConfirmationResponse};
 pub use grpc_server::{ReadyRequest, ReadyResponse};
 
 use crate::shutdown_signal;
@@ -31,6 +32,17 @@ impl RpcService for ServerImpl {
         grpc_info!("(is_ready) contact server.");
         grpc_debug!("(is_ready) [{:?}].", request);
         let response = ReadyResponse { ready: true };
+        Ok(Response::new(response))
+    }
+
+    /// Returns a response with the cargo confirmation
+    async fn cargo_confirmation(
+        &self,
+        request: Request<CargoConfirmationRequest>,
+    ) -> Result<Response<CargoConfirmationResponse>, Status> {
+        grpc_info!("(cargo_confirmation) contact server.");
+        grpc_debug!("(cargo_confirmation) [{:?}].", request);
+        let response = super::api::cargo::cargo_confirmation(request.into_inner()).await?;
         Ok(Response::new(response))
     }
 }
@@ -94,6 +106,16 @@ impl RpcService for ServerImpl {
         grpc_warn!("(is_ready MOCK) contact server.");
         grpc_debug!("(is_ready MOCK) [{:?}].", request);
         let response = ReadyResponse { ready: true };
+        Ok(Response::new(response))
+    }
+
+    async fn cargo_confirmation(
+        &self,
+        request: Request<CargoConfirmationRequest>,
+    ) -> Result<Response<CargoConfirmationResponse>, Status> {
+        grpc_warn!("(cargo_confirmation MOCK) contact server.");
+        grpc_debug!("(cargo_confirmation MOCK) [{:?}].", request);
+        let response = CargoConfirmationResponse { success: true };
         Ok(Response::new(response))
     }
 }
