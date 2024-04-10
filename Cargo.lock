@@ -150,7 +150,7 @@ name = "arrow-macros-derive"
 version = "2.0.0"
 source = "git+https://github.com/aetheric-oss/lib-common?tag=v2.0.0#4457c15d899697762dbaa46c142a78559df8144b"
 dependencies = [
- "arrow-macros-core",
+ "arrow-macros-core 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=latest-develop)",
  "proc-macro-error",
  "proc-macro2",
 ]
@@ -630,6 +630,15 @@ name = "either"
 version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "60b1af1c220855b6ceac025d3f6ecdd2b7c4894bfe9cd9bda4fbb4bc7c0d4cf0"
+
+[[package]]
+name = "encoding_rs"
+version = "0.8.33"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7268b386296a025e474d5140678f75d6de9493ae55a5d709eeb9dd08149945e1"
+dependencies = [
+ "cfg-if",
+]
 
 [[package]]
 name = "equivalent"
@@ -1202,9 +1211,9 @@ checksum = "7943c866cc5cd64cbc25b2e01621d07fa8eb2a1a23160ee81ce38704e97b8ecf"
 
 [[package]]
 name = "itertools"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
+checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
 dependencies = [
  "either",
 ]
@@ -1255,7 +1264,7 @@ name = "lib-common"
 version = "2.0.0"
 source = "git+https://github.com/aetheric-oss/lib-common?tag=v2.0.0#4457c15d899697762dbaa46c142a78559df8144b"
 dependencies = [
- "arrow-macros-derive",
+ "arrow-macros-derive 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=latest-develop)",
  "cargo-husky",
  "chrono",
  "chrono-tz",
@@ -2164,6 +2173,46 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cbf4a6aa5f6d6888f39e980649f3ad6b666acdce1d78e95b8a2cb076e687ae30"
 
 [[package]]
+name = "reqwest"
+version = "0.11.24"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c6920094eb85afde5e4a138be3f2de8bbdf28000f0029e72c45025a56b042251"
+dependencies = [
+ "base64 0.21.7",
+ "bytes",
+ "encoding_rs",
+ "futures-core",
+ "futures-util",
+ "h2",
+ "http",
+ "http-body",
+ "hyper",
+ "hyper-tls",
+ "ipnet",
+ "js-sys",
+ "log",
+ "mime",
+ "native-tls",
+ "once_cell",
+ "percent-encoding",
+ "pin-project-lite",
+ "rustls-pemfile",
+ "serde",
+ "serde_json",
+ "serde_urlencoded",
+ "sync_wrapper",
+ "system-configuration",
+ "tokio",
+ "tokio-native-tls",
+ "tower-service",
+ "url",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+ "winreg",
+]
+
+[[package]]
 name = "ron"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2499,6 +2548,7 @@ dependencies = [
  "tower",
  "tower-http 0.4.4",
  "utoipa",
+ "uuid",
 ]
 
 [[package]]
@@ -2506,7 +2556,7 @@ name = "svc-contact-client-grpc"
 version = "0.0.2-develop.5"
 dependencies = [
  "cfg-if",
- "lib-common",
+ "lib-common 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=latest-develop)",
  "log",
  "logtest",
  "prost",
@@ -2515,6 +2565,7 @@ dependencies = [
  "tokio",
  "tonic",
  "tower",
+ "uuid",
 ]
 
 [[package]]
@@ -2547,7 +2598,7 @@ dependencies = [
  "futures",
  "hyper 0.14.30",
  "lazy_static",
- "lib-common",
+ "lib-common 0.2.1-develop.0 (git+https://github.com/aetheric-oss/lib-common?tag=latest-develop)",
  "log",
  "log4rs",
  "native-tls",
@@ -2584,7 +2635,7 @@ dependencies = [
  "futures",
  "geo",
  "lazy_static",
- "lib-common",
+ "lib-common 0.2.1-develop.0 (git+https://github.com/aetheric-oss/lib-common?tag=latest-develop)",
  "log",
  "num-derive",
  "num-traits",
@@ -3486,6 +3537,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68a9bda4691f099d435ad181000724da8e5899daa10713c2d432552b9ccd3a6f"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "winreg"
+version = "0.50.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "524e57b2c537c0f9b1e69f1965311ec12182b4122e45035b1508cd24d2adadb1"
+dependencies = [
+ "cfg-if",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]

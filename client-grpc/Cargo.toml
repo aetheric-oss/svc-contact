@@ -33,6 +33,7 @@ prost       = "0.12"
 svc-contact = { path = "../server", optional = true }
 tonic       = "0.10"
 tower       = { version = "0.4", optional = true }
+uuid        = { version = "1.8", features = ["v4"] }
 
 [dependencies.lib-common]
 features = ["grpc"]
