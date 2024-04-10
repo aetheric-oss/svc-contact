@@ -33,10 +33,14 @@ chrono       = { version = "0.4", features = ["serde"] }
 clap         = { version = "4.4", features = ["derive"] }
 config       = "0.13"
 dotenv       = "0.15"
+geo-types    = "0.7"
 hyper        = "0.14"
 log          = "0.4"
 openssl      = "0.10"
+polyline     = "0.10.1"
+postmark     = { version = "0.10", features = ["reqwest", "reqwest-native-tls"] }
 prost        = "0.12"
+rand         = "0.8"
 serde        = "1.0"
 serde_json   = "1.0"
 tokio        = { version = "1.33", features = ["full"] }
@@ -45,11 +49,18 @@ tonic        = "0.10"
 tonic-health = "0.10"
 tower        = { version = "0.4", features = ["limit"] }
 tower-http   = { version = "0.4", features = ["cors", "trace"] }
+uuid         = { version = "1.8", features = ["v4"] }
 
 [dependencies.svc-storage-client-grpc]
-features = ["user"]
-git      = "https://github.com/Arrow-air/svc-storage"
-tag      = "latest-develop"
+features = [
+  "user",
+  "flight_plan",
+  "flight_plan_parcel",
+  "vertiport",
+  "itinerary",
+]
+git = "https://github.com/Arrow-air/svc-storage"
+tag = "latest-develop"
 
 [dependencies.lib-common]
 git = "https://github.com/Arrow-air/lib-common"

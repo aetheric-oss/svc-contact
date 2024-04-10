@@ -27,6 +27,8 @@ pub struct Config {
     /// Full url (including port number) to be allowed as request origin for
     /// REST requests
     pub rest_cors_allowed_origin: String,
+    /// postmark token
+    pub postmark_token: String,
 }
 
 impl Default for Config {
@@ -48,6 +50,7 @@ impl Config {
             rest_request_limit_per_second: 2,
             rest_concurrency_limit_per_service: 5,
             rest_cors_allowed_origin: String::from("http://localhost:3000"),
+            postmark_token: String::from("fake_token"),
         }
     }
 
@@ -73,6 +76,7 @@ impl Config {
                 "rest_cors_allowed_origin",
                 default_config.rest_cors_allowed_origin,
             )?
+            .set_default("postmark_token", default_config.postmark_token)?
             .add_source(Environment::default().separator("__"))
             .build()?
             .try_deserialize()
@@ -97,6 +101,7 @@ mod tests {
         assert_eq!(config.log_config, String::from("log4rs.yaml"));
         assert_eq!(config.rest_concurrency_limit_per_service, 5);
         assert_eq!(config.rest_request_limit_per_second, 2);
+        assert_eq!(config.postmark_token, String::from("fake_token"));
         assert_eq!(
             config.rest_cors_allowed_origin,
             String::from("http://localhost:3000")
@@ -121,6 +126,7 @@ mod tests {
             "REST_CORS_ALLOWED_ORIGIN",
             "https://allowed.origin.host:443",
         );
+        std::env::set_var("POSTMARK_TOKEN", "test_token");
 
         let config = Config::try_from_env();
         assert!(config.is_ok());
@@ -133,6 +139,7 @@ mod tests {
         assert_eq!(config.log_config, String::from("config_file.yaml"));
         assert_eq!(config.rest_concurrency_limit_per_service, 255);
         assert_eq!(config.rest_request_limit_per_second, 255);
+        assert_eq!(config.postmark_token, String::from("test_token"));
         assert_eq!(
             config.rest_cors_allowed_origin,
             String::from("https://allowed.origin.host:443")

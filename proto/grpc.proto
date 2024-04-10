@@ -6,6 +6,9 @@ package grpc;
 service RpcService {
     // Common Interfaces
     rpc isReady (ReadyRequest) returns (ReadyResponse);
+
+    // cargo interfaces
+    rpc cargoConfirmation (CargoConfirmationRequest) returns (CargoConfirmationResponse);
 }
 
 // Ready Request object
@@ -18,4 +21,19 @@ message ReadyResponse {
 
     // True if ready
     bool ready = 1;
+}
+
+// Cargo confirmation request
+message CargoConfirmationRequest {
+    // Parcel ID
+    string parcel_id = 1;
+
+    // Itinerary ID
+    string itinerary_id = 2;
+}
+
+// Cargo confirmation response
+message CargoConfirmationResponse {
+    // True if confirmed
+    bool success = 1;
 }
