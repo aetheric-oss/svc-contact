@@ -2556,7 +2556,7 @@ name = "svc-contact-client-grpc"
 version = "0.0.2-develop.5"
 dependencies = [
  "cfg-if",
- "lib-common 0.2.1-develop.0 (git+https://github.com/Arrow-air/lib-common?tag=latest-develop)",
+ "lib-common",
  "log",
  "logtest",
  "prost",
@@ -2598,7 +2598,7 @@ dependencies = [
  "futures",
  "hyper 0.14.30",
  "lazy_static",
- "lib-common 0.2.1-develop.0 (git+https://github.com/aetheric-oss/lib-common?tag=latest-develop)",
+ "lib-common",
  "log",
  "log4rs",
  "native-tls",
@@ -2635,7 +2635,7 @@ dependencies = [
  "futures",
  "geo",
  "lazy_static",
- "lib-common 0.2.1-develop.0 (git+https://github.com/aetheric-oss/lib-common?tag=latest-develop)",
+ "lib-common",
  "log",
  "num-derive",
  "num-traits",
