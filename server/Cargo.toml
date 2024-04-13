@@ -2,7 +2,7 @@
 description = "Arrow contact service gRPC server"
 keywords    = ["vtol", "server", "grpc", "rest", "contact"] # max 5
 name        = "svc-contact"
-version     = "0.0.2-develop.3"
+version     = "0.0.2-develop.4"
 
 authors.workspace      = true
 categories.workspace   = true
