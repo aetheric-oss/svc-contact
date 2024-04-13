@@ -59,11 +59,11 @@ features = [
   "vertiport",
   "itinerary",
 ]
-git = "https://github.com/Arrow-air/svc-storage"
+git = "https://github.com/aetheric-oss/svc-storage"
 tag = "latest-develop"
 
 [dependencies.lib-common]
-git = "https://github.com/Arrow-air/lib-common"
+git = "https://github.com/aetheric-oss/lib-common"
 tag = "latest-develop"
 
 [dependencies.log4rs]
