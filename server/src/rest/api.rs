@@ -11,9 +11,6 @@ use axum::{extract::Extension, Json};
 use hyper::StatusCode;
 
 use svc_storage_client_grpc::prelude::{user::AuthMethod, *};
-// gRPC client types
-// use svc_scheduler_client_grpc::prelude::*;
-// ...
 
 /// Provides a way to tell a caller if the service is healthy.
 /// Checks dependencies, making sure all connections can be made.
@@ -26,6 +23,7 @@ use svc_storage_client_grpc::prelude::{user::AuthMethod, *};
         (status = 503, description = "Service is unhealthy, one or more dependencies unavailable.")
     )
 )]
+#[cfg(not(tarpaulin_include))] // no way to make this fail with stubs
 pub async fn health_check(
     Extension(grpc_clients): Extension<GrpcClients>,
 ) -> Result<(), StatusCode> {
@@ -81,6 +79,7 @@ impl From<SignupRequest> for user::Data {
         (status = 500, description = "Request unsuccessful."),
     )
 )]
+#[cfg(not(tarpaulin_include))] // no way to make this fail with stubs
 pub async fn signup(
     Extension(grpc_clients): Extension<GrpcClients>,
     Json(payload): Json<SignupRequest>,
@@ -111,14 +110,15 @@ pub async fn signup(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use lib_common::uuid::to_uuid;
 
     #[tokio::test]
     async fn test_health_check_success() {
-        crate::get_log_handle().await;
+        lib_common::logger::get_log_handle().await;
         ut_info!("(test_health_check_success) Start.");
 
         // Mock the GrpcClients extension
-        let config = crate::Config::try_from_env().unwrap_or_default();
+        let config = crate::Config::default();
         let grpc_clients = GrpcClients::default(config); // Replace with your own mock implementation
 
         // Call the health_check function
@@ -129,5 +129,29 @@ mod tests {
         assert!(result.is_ok());
 
         ut_info!("(test_health_check_success) Success.");
+    }
+
+    #[tokio::test]
+    async fn test_signup_success() {
+        lib_common::logger::get_log_handle().await;
+        ut_info!("(test_signup_success) Start.");
+
+        // Mock the GrpcClients extension
+        let config = crate::Config::default();
+        let grpc_clients = GrpcClients::default(config); // Replace with your own mock implementation
+
+        // Mock the payload
+        let payload = SignupRequest {
+            display_name: "test".to_string(),
+            email: "test@aetheric.nl".to_string(),
+        };
+
+        let id = signup(Extension(grpc_clients), Json(payload))
+            .await
+            .unwrap()
+            .0;
+
+        // check UUID format
+        to_uuid(&id).unwrap();
     }
 }

@@ -45,7 +45,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_grpc_clients_default() {
-        crate::get_log_handle().await;
+        lib_common::logger::get_log_handle().await;
         ut_info!("(test_grpc_clients_default) Start.");
 
         let config = crate::Config::default();

@@ -126,7 +126,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_grpc_server_is_ready() {
-        crate::get_log_handle().await;
+        lib_common::logger::get_log_handle().await;
         ut_info!("(test_grpc_server_is_ready) Start.");
 
         let imp = ServerImpl::default();
