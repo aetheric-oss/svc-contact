@@ -2,12 +2,15 @@
 
 use crate::grpc::client::GrpcClients;
 use crate::grpc::server::{CargoConfirmationRequest, CargoConfirmationResponse};
-use chrono::{DateTime, Duration, Utc};
+use geo_types::{Coord, LineString};
+use lib_common::time::{DateTime, Duration, Utc};
 use polyline;
 use postmark::api::email::*;
 use postmark::reqwest::PostmarkClient;
 use postmark::*;
 use serde::Serialize;
+use std::fmt::{self, Display, Formatter};
+use svc_storage_client_grpc::prelude::flight_plan;
 use svc_storage_client_grpc::prelude::{AdvancedSearchFilter, Id};
 use svc_storage_client_grpc::simple_service::Client as _;
 use svc_storage_client_grpc::simple_service_linked::Client;
@@ -20,6 +23,7 @@ pub static POSTMARK_TOKEN: OnceCell<String> = OnceCell::const_new();
 /// Aetheric's email address
 const AETHERIC_EMAIL_ADDRESS: &str = "info@aetheric.nl"; // TODO(R5): no-reply@aetheric.nl
 
+#[derive(Debug)]
 struct PlanData {
     id: String,
     origin_latitude: f64,
@@ -30,7 +34,7 @@ struct PlanData {
     target_vertiport_id: String,
     origin_timeslot_start: DateTime<Utc>,
     target_timeslot_end: DateTime<Utc>,
-    path: Vec<geo_types::Coord>,
+    path: Vec<Coord>,
 }
 
 /// Parcel information needed for a confirmation email
@@ -82,8 +86,97 @@ struct Details {
     description: String,
 }
 
+#[derive(Debug, PartialEq)]
+enum FlightPlanError {
+    Data,
+    Path,
+    OriginVertiportId,
+    TargetVertiportId,
+    OriginTimeslotStart,
+    TargetTimeslotEnd,
+}
+
+impl Display for FlightPlanError {
+    #[cfg(not(tarpaulin_include))]
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            FlightPlanError::Data => write!(f, "Data not found"),
+            FlightPlanError::Path => write!(f, "Path not found"),
+            FlightPlanError::OriginVertiportId => write!(f, "Origin vertiport ID not found"),
+            FlightPlanError::TargetVertiportId => write!(f, "Target vertiport ID not found"),
+            FlightPlanError::OriginTimeslotStart => write!(f, "Origin timeslot start not found"),
+            FlightPlanError::TargetTimeslotEnd => write!(f, "Target timeslot end not found"),
+        }
+    }
+}
+
+impl TryFrom<flight_plan::Object> for PlanData {
+    type Error = FlightPlanError;
+
+    fn try_from(object: flight_plan::Object) -> Result<PlanData, Self::Error> {
+        let id = object.id;
+        let data = object.data.ok_or(FlightPlanError::Data)?;
+
+        let path: Vec<Coord> = data
+            .path
+            .ok_or_else(|| {
+                grpc_error!("(try_from) Could not get path.");
+                FlightPlanError::Path
+            })?
+            .points
+            .into_iter()
+            .map(|p| Coord {
+                x: p.longitude,
+                y: p.latitude,
+            })
+            .collect();
+
+        if path.len() < 2 {
+            grpc_error!("(try_from) Path has less than 2 points.");
+            return Err(FlightPlanError::Path);
+        }
+
+        let origin = path[0];
+        let (origin_latitude, origin_longitude) = (origin.y, origin.x);
+        let target = path[path.len() - 1];
+        let (target_latitude, target_longitude) = (target.y, target.x);
+
+        let origin_vertiport_id = data
+            .origin_vertiport_id
+            .ok_or(FlightPlanError::OriginVertiportId)?;
+
+        let target_vertiport_id = data
+            .target_vertiport_id
+            .ok_or(FlightPlanError::TargetVertiportId)?;
+
+        let origin_timeslot_start: DateTime<Utc> = data
+            .origin_timeslot_start
+            .ok_or(FlightPlanError::OriginTimeslotStart)?
+            .into();
+
+        let target_timeslot_end: DateTime<Utc> = data
+            .target_timeslot_end
+            .ok_or(FlightPlanError::TargetTimeslotEnd)?
+            .into();
+
+        Ok(PlanData {
+            id,
+            origin_latitude,
+            origin_longitude,
+            target_latitude,
+            target_longitude,
+            origin_vertiport_id,
+            target_vertiport_id,
+            origin_timeslot_start,
+            target_timeslot_end,
+            path,
+        })
+    }
+}
+
+#[cfg(not(tarpaulin_include))] // no way to make this fail with stubs
 async fn get_plan_data(clients: &GrpcClients, flight_plan_id: &str) -> Result<PlanData, Status> {
-    let response = clients
+    clients
         .storage
         .flight_plan
         .get_by_id(Id {
@@ -91,58 +184,12 @@ async fn get_plan_data(clients: &GrpcClients, flight_plan_id: &str) -> Result<Pl
         })
         .await
         .map_err(|e| Status::internal(format!("Could not get flight plan: {}", e)))?
-        .into_inner();
-
-    let id = response.id;
-    let data = response
-        .data
-        .ok_or_else(|| Status::internal("Flight plan data not found"))?;
-
-    let path = data
-        .path
-        .ok_or_else(|| Status::internal("Path not found"))?
-        .points;
-
-    let (origin_latitude, origin_longitude) = path
-        .first()
-        .map(|p| (p.latitude, p.longitude))
-        .ok_or_else(|| Status::internal("Origin path not found"))?;
-
-    let (target_latitude, target_longitude) = path
-        .last()
-        .map(|p| (p.latitude, p.longitude))
-        .ok_or_else(|| Status::internal("Target path not found"))?;
-
-    Ok(PlanData {
-        id,
-        origin_latitude,
-        origin_longitude,
-        target_latitude,
-        target_longitude,
-        origin_vertiport_id: data
-            .origin_vertiport_id
-            .ok_or_else(|| Status::internal("Origin vertiport ID not found"))?,
-        target_vertiport_id: data
-            .target_vertiport_id
-            .ok_or_else(|| Status::internal("Target vertiport ID not found"))?,
-        origin_timeslot_start: data
-            .origin_timeslot_start
-            .ok_or_else(|| Status::internal("Origin timeslot start not found"))?
-            .into(),
-        target_timeslot_end: data
-            .target_timeslot_end
-            .ok_or_else(|| Status::internal("Target timeslot end not found"))?
-            .into(),
-        path: path
-            .into_iter()
-            .map(|p| geo_types::Coord {
-                x: p.longitude,
-                y: p.latitude,
-            })
-            .collect(),
-    })
+        .into_inner()
+        .try_into()
+        .map_err(|e| Status::internal(format!("Could not get flight plan: {:?}", e)))
 }
 
+#[cfg(not(tarpaulin_include))] // no way to make this fail with stubs
 async fn get_parcel_data(clients: &GrpcClients, parcel_id: &str) -> Result<ParcelData, Status> {
     let parcel_data = clients
         .storage
@@ -226,9 +273,8 @@ async fn get_parcel_data(clients: &GrpcClients, parcel_id: &str) -> Result<Parce
             })
             .ok_or_else(|| Status::internal("Target flight plan not found"))?;
 
-    let path: Vec<geo_types::Coord> = flight_plans.into_iter().flat_map(|f| f.path).collect();
-    let polyline =
-        polyline::encode_coordinates(geo_types::LineString::new(path), 5).unwrap_or("".to_string());
+    let path: Vec<Coord> = flight_plans.into_iter().flat_map(|f| f.path).collect();
+    let polyline = polyline::encode_coordinates(LineString::new(path), 5).unwrap_or("".to_string());
 
     let parcel = ParcelData {
         weight_kg: (parcel_data.weight_grams as f32) / 1000.0,
@@ -246,6 +292,7 @@ async fn get_parcel_data(clients: &GrpcClients, parcel_id: &str) -> Result<Parce
     Ok(parcel)
 }
 
+#[cfg(not(tarpaulin_include))] // no way to make this fail with stubs
 async fn get_vertiport_data(
     clients: &GrpcClients,
     vertiport_id: &str,
@@ -298,6 +345,7 @@ async fn get_user_data(clients: &GrpcClients, user_id: &str) -> Result<UserData,
 }
 
 /// Sends a confirmation email via postmark API
+#[cfg(not(tarpaulin_include))]
 pub async fn cargo_confirmation(
     request: CargoConfirmationRequest,
 ) -> Result<CargoConfirmationResponse, Status> {
@@ -305,17 +353,23 @@ pub async fn cargo_confirmation(
 
     let padding = Duration::try_minutes(10)
         .ok_or_else(|| Status::internal("Could not create time padding"))?;
+
     let dt_format = "%Y-%m-%d %H:%M UTC%z";
 
     let clients = crate::grpc::client::get_clients().await;
+
     let parcel_data = get_parcel_data(clients, &request.parcel_id).await?;
+
     let origin_vertiport_data =
         get_vertiport_data(clients, &parcel_data.origin_vertiport_id).await?;
+
     let target_vertiport_data =
         get_vertiport_data(clients, &parcel_data.target_vertiport_id).await?;
+
     let dropoff_time = (parcel_data.target_timeslot_end - padding)
         .format(dt_format)
         .to_string();
+
     let pickup_time = (parcel_data.origin_timeslot_start + padding)
         .format(dt_format)
         .to_string();
@@ -340,13 +394,20 @@ pub async fn cargo_confirmation(
 
     // TODO(R5): Get these from svc-cargo. Not needed for demo.
     let flight_price = 0.0;
+    let network_fee = 0.0;
     let tax = 0.0;
-    let details = vec![Details {
-        description: "VAT".to_string(),
-        amount: format!("{:.2}", tax),
-    }];
+    let details = vec![
+        Details {
+            description: "Network Fee".to_string(),
+            amount: format!("{:.2}", network_fee),
+        },
+        Details {
+            description: "VAT".to_string(),
+            amount: format!("{:.2}", tax),
+        },
+    ];
 
-    let total_price = format!("{:.2}", flight_price + tax);
+    let total_price = format!("{:.2}", flight_price + network_fee + tax);
     let flight_price = format!("{:.2}", flight_price);
     let currency = "EUR".to_string();
     let invoice_date = Utc::now().format(dt_format).to_string();
@@ -378,14 +439,12 @@ pub async fn cargo_confirmation(
     model.insert("currency", currency);
     model.insert("total_price", total_price);
 
-    let request = SendEmailWithTemplateRequest::builder()
+    let response = SendEmailWithTemplateRequest::builder()
         .from(AETHERIC_EMAIL_ADDRESS)
         .to(user_data.email)
         .template_model(model)
         .template_alias("demo-confirmation")
-        .build();
-
-    let response = request
+        .build()
         .execute(&client)
         .await
         .map_err(|e| Status::internal(format!("Could not send email: {}", e)))?;
@@ -397,7 +456,75 @@ pub async fn cargo_confirmation(
     }
 
     grpc_info!("(cargo_confirmation) success={}.", success);
-    Ok(CargoConfirmationResponse {
-        success: response.error_code == 0,
-    })
+    Ok(CargoConfirmationResponse { success })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use svc_storage_client_grpc::prelude::{GeoLineString, GeoPoint};
+
+    #[test]
+    fn test_try_from_flight_plan_object() {
+        let data = flight_plan::mock::get_data_obj();
+
+        let mut object = flight_plan::Object {
+            id: "test".to_string(),
+            data: None,
+        };
+        let error = PlanData::try_from(object.clone()).unwrap_err();
+        assert_eq!(error, FlightPlanError::Data);
+
+        let tmp = data.clone();
+        object.data = Some(tmp);
+        PlanData::try_from(object.clone()).unwrap();
+
+        let mut tmp = data.clone();
+        tmp.path = None;
+        object.data = Some(tmp);
+        let error = PlanData::try_from(object.clone()).unwrap_err();
+        assert_eq!(error, FlightPlanError::Path);
+
+        let mut tmp = data.clone();
+        tmp.path = Some(GeoLineString { points: vec![] }); // empty path
+        object.data = Some(tmp);
+        let error = PlanData::try_from(object.clone()).unwrap_err();
+        assert_eq!(error, FlightPlanError::Path);
+
+        let mut tmp = data.clone();
+        tmp.path = Some(GeoLineString {
+            points: vec![GeoPoint {
+                longitude: 0.0,
+                latitude: 0.0,
+                altitude: 0.0,
+            }],
+        }); // only one point
+        object.data = Some(tmp);
+        let error = PlanData::try_from(object.clone()).unwrap_err();
+        assert_eq!(error, FlightPlanError::Path);
+
+        let mut tmp = data.clone();
+        tmp.origin_vertiport_id = None;
+        object.data = Some(tmp);
+        let error = PlanData::try_from(object.clone()).unwrap_err();
+        assert_eq!(error, FlightPlanError::OriginVertiportId);
+
+        let mut tmp = data.clone();
+        tmp.target_vertiport_id = None;
+        object.data = Some(tmp);
+        let error = PlanData::try_from(object.clone()).unwrap_err();
+        assert_eq!(error, FlightPlanError::TargetVertiportId);
+
+        let mut tmp = data.clone();
+        tmp.origin_timeslot_start = None;
+        object.data = Some(tmp);
+        let error = PlanData::try_from(object.clone()).unwrap_err();
+        assert_eq!(error, FlightPlanError::OriginTimeslotStart);
+
+        let mut tmp = data.clone();
+        tmp.target_timeslot_end = None;
+        object.data = Some(tmp);
+        let error = PlanData::try_from(object.clone()).unwrap_err();
+        assert_eq!(error, FlightPlanError::TargetTimeslotEnd);
+    }
 }

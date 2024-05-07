@@ -53,6 +53,7 @@ where
     /// # Examples
     /// ```
     /// use lib_common::grpc::get_endpoint_from_env;
+    /// use lib_common::uuid::Uuid;
     /// use svc_contact_client_grpc::prelude::*;
     ///
     /// async fn example () -> Result<(), Box<dyn std::error::Error>> {
@@ -60,8 +61,8 @@ where
     ///     let client = ContactClient::new_client(&host, port, "contact");
     ///     let response = client
     ///         .cargo_confirmation(contact::CargoConfirmationRequest {
-    ///             parcel_id: uuid::Uuid::new_v4().to_string(),
-    ///             itinerary_id: uuid::Uuid::new_v4().to_string(),
+    ///             parcel_id: Uuid::new_v4().to_string(),
+    ///             itinerary_id: Uuid::new_v4().to_string(),
     ///         })
     ///         .await?;
     ///     println!("RESPONSE={:?}", response.into_inner());
