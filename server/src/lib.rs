@@ -66,6 +66,7 @@ pub struct Cli {
 ///     shutdown_tx.send(()).expect("Could not stop server.");
 /// }
 /// ```
+#[cfg(not(tarpaulin_include))]
 pub async fn shutdown_signal(
     server: &str,
     shutdown_rx: Option<tokio::sync::oneshot::Receiver<()>>,

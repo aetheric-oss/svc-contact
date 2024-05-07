@@ -48,7 +48,6 @@ tonic        = "0.10"
 tonic-health = "0.10"
 tower        = { version = "0.4", features = ["limit"] }
 tower-http   = { version = "0.4", features = ["cors", "trace"] }
-uuid         = { version = "1.8", features = ["v4"] }
 
 [dependencies.svc-storage-client-grpc]
 features = [
