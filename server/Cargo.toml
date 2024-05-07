@@ -1,5 +1,5 @@
 [package]
-description = "Arrow contact service gRPC server"
+description = "Aetheric contact service"
 keywords    = ["vtol", "server", "grpc", "rest", "contact"] # max 5
 name        = "svc-contact"
 version     = "0.0.2-develop.4"
@@ -17,7 +17,7 @@ dev              = ["mock"]
 test_util        = ["mock", "stub_backends"]
 vendored-openssl = ["openssl/vendored"]
 # Will add a 'mock' module for the enabled resources, providing access to mock data generation functions
-mock = []
+mock = ["svc-storage-client-grpc/mock"]
 # Will use a stubbed backend connection, only use for tests!
 stub_backends = ["svc-storage-client-grpc/stub_client"]
 # Will implement stub functions for the server, only use for tests!
@@ -29,7 +29,6 @@ stub_client = ["stub_backends"]
 anyhow       = "1.0"
 axum         = "0.5"
 cargo-husky  = "1"
-chrono       = { version = "0.4", features = ["serde"] }
 clap         = { version = "4.4", features = ["derive"] }
 config       = "0.13"
 dotenv       = "0.15"
@@ -37,7 +36,7 @@ geo-types    = "0.7"
 hyper        = "0.14"
 log          = "0.4"
 openssl      = "0.10"
-polyline     = "0.10.1"
+polyline     = "0.10"
 postmark     = { version = "0.10", features = ["reqwest", "reqwest-native-tls"] }
 prost        = "0.12"
 rand         = "0.8"
@@ -49,7 +48,6 @@ tonic        = "0.10"
 tonic-health = "0.10"
 tower        = { version = "0.4", features = ["limit"] }
 tower-http   = { version = "0.4", features = ["cors", "trace"] }
-uuid         = { version = "1.8", features = ["v4"] }
 
 [dependencies.svc-storage-client-grpc]
 features = [
