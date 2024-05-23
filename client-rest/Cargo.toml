@@ -2,7 +2,7 @@
 description = "Aetheric contact service REST client"
 keywords    = ["vtol", "client", "rest", "contact"]  # max 5
 name        = "svc-contact-client-rest"
-version     = "0.0.2-develop.4"
+version     = "0.0.2-develop.5"
 
 authors.workspace      = true
 categories.workspace   = true
