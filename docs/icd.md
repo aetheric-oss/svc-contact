@@ -1,10 +1,8 @@
 # Interface Control Document (ICD) - `svc-contact`
 
-<center>
 
-<img src="https://github.com/aetheric-oss/.github/blob/main/assets/doc-banner.png" style="height:250px" />
+![Aetheric Banner](https://github.com/aetheric-oss/.github/raw/main/assets/doc-banner.png)
 
-</center>
 
 ## Overview
 
