@@ -1,10 +1,7 @@
 # Software Design Document (SDD) - `svc-contact` 
 
-<center>
 
-<img src="https://github.com/aetheric-oss/.github/blob/main/assets/doc-banner.png" style="height:250px" />
-
-</center>
+![Aetheric Banner](https://github.com/aetheric-oss/.github/raw/main/assets/doc-banner.png)
 
 ## Overview
 
