@@ -34,8 +34,8 @@ impl crate::service::Client<RpcServiceClient<Channel>> for ContactClient {
         &self,
         request: Self::ReadyRequest,
     ) -> Result<tonic::Response<Self::ReadyResponse>, tonic::Status> {
-        grpc_info!("(is_ready) {} client.", self.get_name());
-        grpc_debug!("(is_ready) request: {:?}", request);
+        grpc_info!("{} client.", self.get_name());
+        grpc_debug!("request: {:?}", request);
         self.get_client().await?.is_ready(request).await
     }
 
@@ -43,8 +43,8 @@ impl crate::service::Client<RpcServiceClient<Channel>> for ContactClient {
         &self,
         request: Self::CargoConfirmationRequest,
     ) -> Result<tonic::Response<Self::CargoConfirmationResponse>, tonic::Status> {
-        grpc_info!("(cargo_confirmation) {} client.", self.get_name());
-        grpc_debug!("(cargo_confirmation) request: {:?}", request);
+        grpc_info!("{} client.", self.get_name());
+        grpc_debug!("request: {:?}", request);
         self.get_client().await?.cargo_confirmation(request).await
     }
 }
@@ -61,8 +61,8 @@ impl crate::service::Client<RpcServiceClient<Channel>> for ContactClient {
         &self,
         request: Self::ReadyRequest,
     ) -> Result<tonic::Response<Self::ReadyResponse>, tonic::Status> {
-        grpc_warn!("(is_ready MOCK) {} client.", self.get_name());
-        grpc_debug!("(is_ready MOCK) request: {:?}", request);
+        grpc_warn!("(MOCK) {} client.", self.get_name());
+        grpc_debug!("(MOCK) request: {:?}", request);
         Ok(tonic::Response::new(ReadyResponse { ready: true }))
     }
 
@@ -70,8 +70,8 @@ impl crate::service::Client<RpcServiceClient<Channel>> for ContactClient {
         &self,
         request: Self::CargoConfirmationRequest,
     ) -> Result<tonic::Response<Self::CargoConfirmationResponse>, tonic::Status> {
-        grpc_warn!("(cargo_confirmation MOCK) {} client.", self.get_name());
-        grpc_debug!("(cargo_confirmation MOCK) request: {:?}", request);
+        grpc_warn!("(MOCK) {} client.", self.get_name());
+        grpc_debug!("(MOCK) request: {:?}", request);
         Ok(tonic::Response::new(CargoConfirmationResponse {
             success: true,
         }))

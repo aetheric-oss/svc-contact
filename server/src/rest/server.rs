@@ -27,12 +27,12 @@ pub async fn rest_server(
     config: Config,
     shutdown_rx: Option<tokio::sync::oneshot::Receiver<()>>,
 ) -> Result<(), ()> {
-    rest_info!("(rest_server) entry.");
+    rest_info!("entry.");
     let rest_port = config.docker_port_rest;
     let full_rest_addr: SocketAddr = match format!("[::]:{}", rest_port).parse() {
         Ok(addr) => addr,
         Err(e) => {
-            rest_error!("(rest_server) invalid address: {:?}, exiting.", e);
+            rest_error!("invalid address: {:?}, exiting.", e);
             return Err(());
         }
     };
@@ -40,10 +40,7 @@ pub async fn rest_server(
     let cors_allowed_origin = match config.rest_cors_allowed_origin.parse::<HeaderValue>() {
         Ok(url) => url,
         Err(e) => {
-            rest_error!(
-                "(rest_server) invalid cors_allowed_origin address: {:?}, exiting.",
-                e
-            );
+            rest_error!("invalid cors_allowed_origin address: {:?}, exiting.", e);
             return Err(());
         }
     };
@@ -54,7 +51,7 @@ pub async fn rest_server(
     let limit_middleware = ServiceBuilder::new()
         .layer(TraceLayer::new_for_http())
         .layer(HandleErrorLayer::new(|e: BoxError| async move {
-            rest_warn!("(rest_server) too many requests: {}", e);
+            rest_warn!("too many requests: {}", e);
             (
                 StatusCode::TOO_MANY_REQUESTS,
                 "(rest_server) too many requests.".to_string(),
@@ -97,11 +94,11 @@ pub async fn rest_server(
         .await
     {
         Ok(_) => {
-            rest_info!("(rest_server) hosted at: {}.", full_rest_addr);
+            rest_info!("hosted at: {}.", full_rest_addr);
             Ok(())
         }
         Err(e) => {
-            rest_error!("(rest_server) could not start server: {}", e);
+            rest_error!("could not start server: {}", e);
             Err(())
         }
     }

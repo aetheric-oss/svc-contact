@@ -90,7 +90,7 @@ mod tests {
     #[tokio::test]
     async fn test_config_from_default() {
         lib_common::logger::get_log_handle().await;
-        ut_info!("(test_config_from_default) Start.");
+        ut_info!("Start.");
 
         let config = Config::default();
 
@@ -107,13 +107,13 @@ mod tests {
             String::from("http://localhost:3000")
         );
 
-        ut_info!("(test_config_from_default) Success.");
+        ut_info!("Success.");
     }
 
     #[tokio::test]
     async fn test_config_from_env() {
         lib_common::logger::get_log_handle().await;
-        ut_info!("(test_config_from_env) Start.");
+        ut_info!("Start.");
 
         std::env::set_var("DOCKER_PORT_GRPC", "6789");
         std::env::set_var("DOCKER_PORT_REST", "9876");
@@ -145,6 +145,6 @@ mod tests {
             String::from("https://allowed.origin.host:443")
         );
 
-        ut_info!("(test_config_from_env) Success.");
+        ut_info!("Success.");
     }
 }

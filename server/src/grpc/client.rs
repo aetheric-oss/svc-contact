@@ -46,15 +46,15 @@ mod tests {
     #[tokio::test]
     async fn test_grpc_clients_default() {
         lib_common::logger::get_log_handle().await;
-        ut_info!("(test_grpc_clients_default) Start.");
+        ut_info!("Start.");
 
         let config = crate::Config::default();
         let clients = GrpcClients::default(config);
 
         let user = clients.storage.user;
-        ut_debug!("(test_grpc_clients_default) user: {:?}", user);
+        ut_debug!("user: {:?}", user);
         assert_eq!(user.get_name(), "user");
 
-        ut_info!("(test_grpc_clients_default) Success.");
+        ut_info!("Success.");
     }
 }

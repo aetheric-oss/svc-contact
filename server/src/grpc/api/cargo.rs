@@ -120,7 +120,7 @@ impl TryFrom<flight_plan::Object> for PlanData {
         let path: Vec<Coord> = data
             .path
             .ok_or_else(|| {
-                grpc_error!("(try_from) Could not get path.");
+                grpc_error!("Could not get path.");
                 FlightPlanError::Path
             })?
             .points
@@ -132,7 +132,7 @@ impl TryFrom<flight_plan::Object> for PlanData {
             .collect();
 
         if path.len() < 2 {
-            grpc_error!("(try_from) Path has less than 2 points.");
+            grpc_error!("Path has less than 2 points.");
             return Err(FlightPlanError::Path);
         }
 
@@ -349,7 +349,7 @@ async fn get_user_data(clients: &GrpcClients, user_id: &str) -> Result<UserData,
 pub async fn cargo_confirmation(
     request: CargoConfirmationRequest,
 ) -> Result<CargoConfirmationResponse, Status> {
-    grpc_info!("(cargo_confirmation) entry.");
+    grpc_info!("entry.");
 
     let padding = Duration::try_minutes(10)
         .ok_or_else(|| Status::internal("Could not create time padding"))?;
@@ -451,11 +451,11 @@ pub async fn cargo_confirmation(
 
     let success = response.error_code == 0;
     if !success {
-        grpc_error!("(cargo_confirmation) Could not send email: {:?}", response);
+        grpc_error!("Could not send email: {:?}", response);
         return Err(Status::internal("Could not send email"));
     }
 
-    grpc_info!("(cargo_confirmation) success={}.", success);
+    grpc_info!("success={}.", success);
     Ok(CargoConfirmationResponse { success })
 }
 

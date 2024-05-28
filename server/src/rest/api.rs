@@ -27,7 +27,7 @@ use svc_storage_client_grpc::prelude::{user::AuthMethod, *};
 pub async fn health_check(
     Extension(grpc_clients): Extension<GrpcClients>,
 ) -> Result<(), StatusCode> {
-    rest_debug!("(health_check) entry.");
+    rest_debug!("entry.");
 
     let mut ok = true;
 
@@ -42,17 +42,17 @@ pub async fn health_check(
         .is_err()
     {
         let error_msg = "svc-storage user unavailable.".to_string();
-        rest_error!("(health_check) {}.", &error_msg);
+        rest_error!("{}.", &error_msg);
         ok = false;
     }
 
     match ok {
         true => {
-            rest_debug!("(health_check) healthy, all dependencies running.");
+            rest_debug!("healthy, all dependencies running.");
             Ok(())
         }
         false => {
-            rest_error!("(health_check) unhealthy, 1+ dependencies down.");
+            rest_error!("unhealthy, 1+ dependencies down.");
             Err(StatusCode::SERVICE_UNAVAILABLE)
         }
     }
@@ -84,7 +84,7 @@ pub async fn signup(
     Extension(grpc_clients): Extension<GrpcClients>,
     Json(payload): Json<SignupRequest>,
 ) -> Result<Json<String>, StatusCode> {
-    rest_debug!("(signup) entry.");
+    rest_debug!("entry.");
 
     let data: user::Data = payload.into();
     let user_id = grpc_clients
@@ -93,13 +93,13 @@ pub async fn signup(
         .insert(data)
         .await
         .map_err(|e| {
-            rest_error!("(signup) failed to insert user: {}.", e);
+            rest_error!("failed to insert user: {}.", e);
             StatusCode::INTERNAL_SERVER_ERROR
         })?
         .into_inner()
         .object
         .ok_or_else(|| {
-            rest_error!("(signup) failed to insert user: no user object returned.");
+            rest_error!("failed to insert user: no user object returned.");
             StatusCode::INTERNAL_SERVER_ERROR
         })?
         .id;
@@ -115,7 +115,7 @@ mod tests {
     #[tokio::test]
     async fn test_health_check_success() {
         lib_common::logger::get_log_handle().await;
-        ut_info!("(test_health_check_success) Start.");
+        ut_info!("Start.");
 
         // Mock the GrpcClients extension
         let config = crate::Config::default();
@@ -128,13 +128,13 @@ mod tests {
         println!("{:?}", result);
         assert!(result.is_ok());
 
-        ut_info!("(test_health_check_success) Success.");
+        ut_info!("Success.");
     }
 
     #[tokio::test]
     async fn test_signup_success() {
         lib_common::logger::get_log_handle().await;
-        ut_info!("(test_signup_success) Start.");
+        ut_info!("Start.");
 
         // Mock the GrpcClients extension
         let config = crate::Config::default();
