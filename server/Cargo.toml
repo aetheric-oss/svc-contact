@@ -58,11 +58,11 @@ features = [
   "itinerary",
 ]
 git = "https://github.com/aetheric-oss/svc-storage"
-tag = "latest-develop"
+tag = "main"
 
 [dependencies.lib-common]
 git = "https://github.com/aetheric-oss/lib-common"
-tag = "latest-develop"
+tag = "main"
 
 [dependencies.log4rs]
 features = [

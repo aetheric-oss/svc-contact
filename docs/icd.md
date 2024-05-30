@@ -18,7 +18,7 @@ Document | Description
 --- | ---
 [High-Level Concept of Operations (CONOPS)](https://github.com/aetheric-oss/se-services/blob/develop/docs/conops.md) | Overview of Aetheric microservices.
 [High-Level Interface Control Document (ICD)](https://github.com/aetheric-oss/se-services/blob/develop/docs/icd.md)  | Interfaces and frameworks common to all Aetheric microservices.
-[Requirements - `svc-contact`](https://nocodb.arrowair.com/dashboard/#/nc/view/a2df942d-fcd7-47c0-9d8b-83b7df5698d1) | Requirements and user stories for this microservice.
+[Requirements - `svc-contact`](https://nocodb.aetheric.nl/dashboard/#/nc/view/a2df942d-fcd7-47c0-9d8b-83b7df5698d1) | Requirements and user stories for this microservice.
 [Concept of Operations - `svc-contact`](./conops.md) | Defines the motivation and duties of this microservice.
 [Software Design Document (SDD) - `svc-contact`](./sdd.md) | Specifies the internal activity of this microservice.
 
@@ -26,9 +26,22 @@ Document | Description
 
 See the High-Level ICD.
 
-## REST
+## :speech_balloon: REST
 
-This microservice implements no additional REST endpoints beyond the common REST interfaces (see High-Level ICD).
+### Files
+
+Filename | Description
+--- | ---
+`openapi/types.rs` | Data types used for REST requests and replies.
+`client-rest/src/lib.rs` | Imports the REST types file to create the `svc-cargo-client-rest` library, usable by other Rust crates.
+
+### Authentication
+
+See the High-Level Services ICD.
+
+### Endpoints
+
+See our [public documentation](https://www.arrowair.com/docs/documentation/services/api/rest/develop#tag/svc-contact) for a full API.
 
 ## gRPC
 
@@ -44,10 +57,10 @@ See the High-Level ICD.
 
 | Service | Description |
 | ---- | ---- |
-| `GetExample` | This is an example Service.<br>Replace
+| `cargoConfirmation` | Inform svc-contact to issue an email or text to a customer, informing them that an itinerary has been created.
 
 ### gRPC Client Messages ("Requests")
 
 | Request | Description |
 | ------    | ------- |
-| `ExampleQuery` | A message to illustrate an example
+| `CargoConfirmationRequest` | Contains a parcel ID and itinerary ID for svc-contact, which is sufficient to obtain all of the other necessary information from svc-storage.

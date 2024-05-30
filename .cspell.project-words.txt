@@ -36,3 +36,5 @@ reqwest
 polyline
 timeslot
 dropoff
+mailchimp
+signup

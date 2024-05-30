@@ -19,13 +19,15 @@ Document | Description
 --- | ---
 [High-Level Concept of Operations (CONOPS)](https://github.com/aetheric-oss/se-services/blob/develop/docs/conops.md) | Overview of Aetheric microservices.
 [High-Level Interface Control Document (ICD)](https://github.com/aetheric-oss/se-services/blob/develop/docs/icd.md)  | Interfaces and frameworks common to all Aetheric microservices.
-[Requirements - `svc-contact`](https://nocodb.arrowair.com/dashboard/#/nc/view/a2df942d-fcd7-47c0-9d8b-83b7df5698d1) | Requirements and user stories for this microservice.
+[Requirements - `svc-contact`](https://nocodb.aetheric.nl/dashboard/#/nc/view/a2df942d-fcd7-47c0-9d8b-83b7df5698d1) | Requirements and user stories for this microservice.
 [Interface Control Document (ICD) - `svc-contact`](./icd.md) | Defines the inputs and outputs of this microservice.
 [Software Design Document (SDD) - `svc-contact`](./sdd.md) | Specifies the internal activity of this microservice.
 
 ## Motivation
 
-FIXME - Why is it needed?
+This module has connections to external services (like SendGrid, Mailchimp, or Postmark).
+
+Users will receive updates via this service and an external email/sms delivery service.
 
 ## Needs, Goals and Objectives of Envisioned System
 

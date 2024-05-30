@@ -13,7 +13,8 @@ use utoipa::OpenApi;
 #[derive(OpenApi, Copy, Clone, Debug)]
 #[openapi(
     paths(
-        api::signup
+        api::health::health_check,
+        api::user::signup
     ),
     components(
         schemas(
