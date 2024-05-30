@@ -1,11 +1,16 @@
-//! Rest API implementations for health checks
+//! Rest API implementations
 /// openapi generated rest types
-pub use super::rest_types::*;
+pub mod rest_types {
+    include!("../../../openapi/types.rs");
+}
+
+pub use rest_types::*;
+
 use crate::grpc::client::GrpcClients;
-use axum::extract::Extension;
+use axum::{extract::Extension, Json};
 use hyper::StatusCode;
 
-use svc_storage_client_grpc::prelude::*;
+use svc_storage_client_grpc::prelude::{user::AuthMethod, *};
 
 /// Provides a way to tell a caller if the service is healthy.
 /// Checks dependencies, making sure all connections can be made.
@@ -56,11 +61,50 @@ pub async fn health_check(
 impl From<SignupRequest> for user::Data {
     fn from(req: SignupRequest) -> Self {
         user::Data {
-            auth_method: user::AuthMethod::Local.into(), // TODO(R5): Update this with the right auth method
+            auth_method: AuthMethod::Local.into(), // TODO(R5): Update this with the right auth method
             display_name: req.display_name,
             email: req.email,
         }
     }
+}
+
+/// Example REST API function
+#[utoipa::path(
+    post,
+    path = "/contact/signup",
+    tag = "svc-contact",
+    request_body = SignupRequest,
+    responses(
+        (status = 200, description = "Request successful.", body = String),
+        (status = 500, description = "Request unsuccessful."),
+    )
+)]
+#[cfg(not(tarpaulin_include))] // no way to make this fail with stubs
+pub async fn signup(
+    Extension(grpc_clients): Extension<GrpcClients>,
+    Json(payload): Json<SignupRequest>,
+) -> Result<Json<String>, StatusCode> {
+    rest_debug!("entry.");
+
+    let data: user::Data = payload.into();
+    let user_id = grpc_clients
+        .storage
+        .user
+        .insert(data)
+        .await
+        .map_err(|e| {
+            rest_error!("failed to insert user: {}.", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?
+        .into_inner()
+        .object
+        .ok_or_else(|| {
+            rest_error!("failed to insert user: no user object returned.");
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?
+        .id;
+
+    Ok(Json(user_id))
 }
 
 #[cfg(test)]
@@ -85,5 +129,29 @@ mod tests {
         assert!(result.is_ok());
 
         ut_info!("Success.");
+    }
+
+    #[tokio::test]
+    async fn test_signup_success() {
+        lib_common::logger::get_log_handle().await;
+        ut_info!("Start.");
+
+        // Mock the GrpcClients extension
+        let config = crate::Config::default();
+        let grpc_clients = GrpcClients::default(config); // Replace with your own mock implementation
+
+        // Mock the payload
+        let payload = SignupRequest {
+            display_name: "test".to_string(),
+            email: "test@aetheric.nl".to_string(),
+        };
+
+        let id = signup(Extension(grpc_clients), Json(payload))
+            .await
+            .unwrap()
+            .0;
+
+        // check UUID format
+        to_uuid(&id).unwrap();
     }
 }
