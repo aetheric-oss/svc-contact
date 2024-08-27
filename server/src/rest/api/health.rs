@@ -18,7 +18,8 @@ use svc_storage_client_grpc::prelude::*;
         (status = 503, description = "Service is unhealthy, one or more dependencies unavailable.")
     )
 )]
-#[cfg(not(tarpaulin_include))] // no way to make this fail with stubs
+#[cfg(not(tarpaulin_include))]
+// no_coverage: (Rnever) no way to make this fail with stubs
 pub async fn health_check(
     Extension(grpc_clients): Extension<GrpcClients>,
 ) -> Result<(), StatusCode> {
@@ -26,37 +27,35 @@ pub async fn health_check(
 
     let mut ok = true;
 
-    // FIXME - update/ uncomment this with the right dependencies.
     // This health check is to verify that ALL dependencies of this
     // microservice are running.
-    if grpc_clients
+
+    ok &= grpc_clients
         .storage
         .user
         .is_ready(ReadyRequest {})
         .await
-        .is_err()
-    {
-        let error_msg = "svc-storage user unavailable.".to_string();
-        rest_error!("{}.", &error_msg);
-        ok = false;
+        .map_err(|e| {
+            rest_error!("svc-storage user unavailable: {}.", e);
+        })
+        .is_ok();
+
+    // others here
+
+    if !ok {
+        rest_error!("unhealthy, 1+ dependencies down.");
+        return Err(StatusCode::SERVICE_UNAVAILABLE);
     }
 
-    match ok {
-        true => {
-            rest_debug!("healthy, all dependencies running.");
-            Ok(())
-        }
-        false => {
-            rest_error!("unhealthy, 1+ dependencies down.");
-            Err(StatusCode::SERVICE_UNAVAILABLE)
-        }
-    }
+    rest_debug!("healthy, all dependencies running.");
+    Ok(())
 }
 
 impl From<SignupRequest> for user::Data {
     fn from(req: SignupRequest) -> Self {
         user::Data {
-            auth_method: user::AuthMethod::Local.into(), // TODO(R5): Update this with the right auth method
+            // TODO(R5): Update this with the right auth method
+            auth_method: user::AuthMethod::Local.into(),
             display_name: req.display_name,
             email: req.email,
         }
@@ -66,7 +65,6 @@ impl From<SignupRequest> for user::Data {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use lib_common::uuid::to_uuid;
 
     #[tokio::test]
     async fn test_health_check_success() {
