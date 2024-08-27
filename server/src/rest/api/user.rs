@@ -18,7 +18,8 @@ use svc_storage_client_grpc::prelude::*;
         (status = 500, description = "Request unsuccessful."),
     )
 )]
-#[cfg(not(tarpaulin_include))] // no way to make this fail with stubs
+#[cfg(not(tarpaulin_include))]
+// no_coverage: (Rnever) not unit testable, only integration tests
 pub async fn signup(
     Extension(grpc_clients): Extension<GrpcClients>,
     Json(payload): Json<SignupRequest>,

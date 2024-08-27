@@ -1,7 +1,6 @@
 //! gRPC client helpers implementation
 use tokio::sync::OnceCell;
 
-// FIXME: import other microservices' GRPC clients instead, this is just an example.
 use svc_storage_client_grpc::prelude::Clients;
 
 pub(crate) static CLIENTS: OnceCell<GrpcClients> = OnceCell::const_new();
@@ -22,7 +21,7 @@ pub async fn get_clients() -> &'static GrpcClients {
 /// Struct to hold all gRPC client connections
 #[derive(Clone, Debug)]
 pub struct GrpcClients {
-    /// FIXME: add the correct clients here
+    /// Storage gRPC client
     pub storage: Clients,
 }
 

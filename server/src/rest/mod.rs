@@ -26,6 +26,7 @@ use utoipa::OpenApi;
     )
 )]
 #[cfg(not(tarpaulin_include))]
+// no_coverage: (Rnever) not unit testable
 pub struct ApiDoc;
 
 /// Errors with OpenAPI generation
@@ -40,7 +41,6 @@ pub enum OpenApiError {
 
 impl std::error::Error for OpenApiError {}
 
-#[cfg(not(tarpaulin_include))] // Exclude from coverage, not possible to make this fail to generate JSON
 impl Display for OpenApiError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
@@ -51,7 +51,8 @@ impl Display for OpenApiError {
 }
 
 /// Create OpenAPI 3.0 Specification File
-#[cfg(not(tarpaulin_include))] // Exclude from coverage, doesn't appear to be a way to make this fail to generate a JSON
+#[cfg(not(tarpaulin_include))]
+// no_coverage: (Rnever) doesn't appear to be a way to make this fail to generate a JSON
 pub fn generate_openapi_spec<T>(target: &str) -> Result<(), OpenApiError>
 where
     T: OpenApi,
@@ -85,5 +86,17 @@ mod tests {
         // struct InvalidApi;
         // let error = generate_openapi_spec::<InvalidApi>("test.json").unwrap_err();
         // assert_eq!(error, OpenApiError::Json);
+    }
+
+    #[test]
+    fn test_openapi_error_display() {
+        assert_eq!(
+            format!("{}", OpenApiError::Json),
+            "Failed to export as JSON string"
+        );
+        assert_eq!(
+            format!("{}", OpenApiError::FileWrite),
+            "Failed to write to file"
+        );
     }
 }

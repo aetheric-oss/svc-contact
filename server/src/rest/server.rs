@@ -21,8 +21,7 @@ use tower_http::trace::TraceLayer;
 
 /// Starts the REST API server for this microservice
 #[cfg(not(tarpaulin_include))]
-// no_coverage: Needs running backends to work.
-// Will be tested in integration tests.
+// no_coverage: (Rnever) not unit testable, only integration tests
 pub async fn rest_server(
     config: Config,
     shutdown_rx: Option<tokio::sync::oneshot::Receiver<()>>,

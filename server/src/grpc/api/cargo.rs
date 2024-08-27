@@ -10,7 +10,7 @@ use postmark::reqwest::PostmarkClient;
 use postmark::*;
 use serde::Serialize;
 use std::fmt::{self, Display, Formatter};
-use svc_storage_client_grpc::prelude::flight_plan;
+use svc_storage_client_grpc::prelude::{flight_plan, vertiport};
 use svc_storage_client_grpc::prelude::{AdvancedSearchFilter, Id};
 use svc_storage_client_grpc::simple_service::Client as _;
 use svc_storage_client_grpc::simple_service_linked::Client;
@@ -20,8 +20,9 @@ use tonic::Status;
 /// Postmark token
 pub static POSTMARK_TOKEN: OnceCell<String> = OnceCell::const_new();
 
+// TODO(R5): no-reply@aetheric.nl
 /// Aetheric's email address
-const AETHERIC_EMAIL_ADDRESS: &str = "info@aetheric.nl"; // TODO(R5): no-reply@aetheric.nl
+const AETHERIC_EMAIL_ADDRESS: &str = "info@aetheric.nl";
 
 #[derive(Debug)]
 struct PlanData {
@@ -97,7 +98,6 @@ enum FlightPlanError {
 }
 
 impl Display for FlightPlanError {
-    #[cfg(not(tarpaulin_include))]
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             FlightPlanError::Data => write!(f, "Data not found"),
@@ -125,10 +125,7 @@ impl TryFrom<flight_plan::Object> for PlanData {
             })?
             .points
             .into_iter()
-            .map(|p| Coord {
-                x: p.longitude,
-                y: p.latitude,
-            })
+            .map(|p| Coord { x: p.x, y: p.y })
             .collect();
 
         if path.len() < 2 {
@@ -174,7 +171,22 @@ impl TryFrom<flight_plan::Object> for PlanData {
     }
 }
 
-#[cfg(not(tarpaulin_include))] // no way to make this fail with stubs
+impl TryFrom<vertiport::Object> for VertiportData {
+    type Error = Status;
+
+    fn try_from(object: vertiport::Object) -> Result<Self, Self::Error> {
+        object
+            .data
+            .map(|data| VertiportData {
+                name: data.name,
+                address: data.description,
+            })
+            .ok_or_else(|| Status::internal("Vertiport data not found"))
+    }
+}
+
+#[cfg(not(tarpaulin_include))]
+// no_coverage: (Rnever) not unit testable, only integration tests
 async fn get_plan_data(clients: &GrpcClients, flight_plan_id: &str) -> Result<PlanData, Status> {
     clients
         .storage
@@ -189,7 +201,8 @@ async fn get_plan_data(clients: &GrpcClients, flight_plan_id: &str) -> Result<Pl
         .map_err(|e| Status::internal(format!("Could not get flight plan: {:?}", e)))
 }
 
-#[cfg(not(tarpaulin_include))] // no way to make this fail with stubs
+#[cfg(not(tarpaulin_include))]
+// no_coverage: (Rnever) not unit testable, only integration tests
 async fn get_parcel_data(clients: &GrpcClients, parcel_id: &str) -> Result<ParcelData, Status> {
     let parcel_data = clients
         .storage
@@ -292,12 +305,13 @@ async fn get_parcel_data(clients: &GrpcClients, parcel_id: &str) -> Result<Parce
     Ok(parcel)
 }
 
-#[cfg(not(tarpaulin_include))] // no way to make this fail with stubs
+#[cfg(not(tarpaulin_include))]
+// no_coverage: (Rnever) not unit testable, only integration tests
 async fn get_vertiport_data(
     clients: &GrpcClients,
     vertiport_id: &str,
 ) -> Result<VertiportData, Status> {
-    let vertiport_data = clients
+    clients
         .storage
         .vertiport
         .get_by_id(Id {
@@ -306,15 +320,11 @@ async fn get_vertiport_data(
         .await
         .map_err(|e| Status::internal(format!("Could not get vertiport: {}", e)))?
         .into_inner()
-        .data
-        .ok_or_else(|| Status::internal("Vertiport data not found"))?;
-
-    Ok(VertiportData {
-        name: vertiport_data.name,
-        address: vertiport_data.description,
-    })
+        .try_into()
 }
 
+#[cfg(not(tarpaulin_include))]
+// no_coverage: (Rnever) not unit testable, only integration tests
 async fn get_user_data(clients: &GrpcClients, user_id: &str) -> Result<UserData, Status> {
     let user_data = clients
         .storage
@@ -344,8 +354,9 @@ async fn get_user_data(clients: &GrpcClients, user_id: &str) -> Result<UserData,
     Ok(UserData { name, email })
 }
 
-/// Sends a confirmation email via postmark API
+/// Sends a confirmation email to the user
 #[cfg(not(tarpaulin_include))]
+// no_coverage: (Rnever) not unit testable, only integration tests
 pub async fn cargo_confirmation(
     request: CargoConfirmationRequest,
 ) -> Result<CargoConfirmationResponse, Status> {
@@ -411,7 +422,8 @@ pub async fn cargo_confirmation(
     let flight_price = format!("{:.2}", flight_price);
     let currency = "EUR".to_string();
     let invoice_date = Utc::now().format(dt_format).to_string();
-    let invoice_id = rand::random::<u16>().to_string(); // TODO(R5): no actual payments in demo
+    // TODO(R5): no actual payments in demo
+    let invoice_id = rand::random::<u16>().to_string();
 
     let client = PostmarkClient::builder()
         .base_url(POSTMARK_API_URL)
@@ -462,11 +474,15 @@ pub async fn cargo_confirmation(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use svc_storage_client_grpc::prelude::{GeoLineString, GeoPoint};
+    use svc_storage_client_grpc::prelude::{GeoLineStringZ, GeoPointZ};
 
     #[test]
     fn test_try_from_flight_plan_object() {
-        let data = flight_plan::mock::get_data_obj();
+        let data = flight_plan::Data {
+            origin_vertiport_id: Some("origin".to_string()),
+            target_vertiport_id: Some("target".to_string()),
+            ..flight_plan::mock::get_data_obj()
+        };
 
         let mut object = flight_plan::Object {
             id: "test".to_string(),
@@ -486,17 +502,17 @@ mod tests {
         assert_eq!(error, FlightPlanError::Path);
 
         let mut tmp = data.clone();
-        tmp.path = Some(GeoLineString { points: vec![] }); // empty path
+        tmp.path = Some(GeoLineStringZ { points: vec![] }); // empty path
         object.data = Some(tmp);
         let error = PlanData::try_from(object.clone()).unwrap_err();
         assert_eq!(error, FlightPlanError::Path);
 
         let mut tmp = data.clone();
-        tmp.path = Some(GeoLineString {
-            points: vec![GeoPoint {
-                longitude: 0.0,
-                latitude: 0.0,
-                altitude: 0.0,
+        tmp.path = Some(GeoLineStringZ {
+            points: vec![GeoPointZ {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
             }],
         }); // only one point
         object.data = Some(tmp);
@@ -526,5 +542,27 @@ mod tests {
         object.data = Some(tmp);
         let error = PlanData::try_from(object.clone()).unwrap_err();
         assert_eq!(error, FlightPlanError::TargetTimeslotEnd);
+    }
+
+    #[test]
+    fn test_flight_plan_error_display() {
+        assert_eq!(FlightPlanError::Data.to_string(), "Data not found");
+        assert_eq!(FlightPlanError::Path.to_string(), "Path not found");
+        assert_eq!(
+            FlightPlanError::OriginVertiportId.to_string(),
+            "Origin vertiport ID not found"
+        );
+        assert_eq!(
+            FlightPlanError::TargetVertiportId.to_string(),
+            "Target vertiport ID not found"
+        );
+        assert_eq!(
+            FlightPlanError::OriginTimeslotStart.to_string(),
+            "Origin timeslot start not found"
+        );
+        assert_eq!(
+            FlightPlanError::TargetTimeslotEnd.to_string(),
+            "Target timeslot end not found"
+        );
     }
 }

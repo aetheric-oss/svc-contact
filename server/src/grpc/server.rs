@@ -59,6 +59,7 @@ impl RpcService for ServerImpl {
 /// }
 /// ```
 #[cfg(not(tarpaulin_include))]
+// no_coverage: (R5) Can not be tested in unit test, should be part of integration tests.
 pub async fn grpc_server(config: Config, shutdown_rx: Option<tokio::sync::oneshot::Receiver<()>>) {
     grpc_debug!("entry.");
 

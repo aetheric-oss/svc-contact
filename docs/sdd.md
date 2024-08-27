@@ -55,6 +55,8 @@ This information allows `svc-contact` to connect to other microservices to obtai
 
 For detailed sequence diagrams regarding request handlers, see [REST Handlers](#speech_balloon-rest-handlers).
 
+This service makes requests to [Postmark](https://postmarkapp.com/), an email and SMS service. Email templates (itinerary confirmation, etc.) are created in Postmark. When a confirmation occurs, this service provides the necessary values for the template fields via the request body to the Postmark application.
+
 ### Cleanup
 
 None
