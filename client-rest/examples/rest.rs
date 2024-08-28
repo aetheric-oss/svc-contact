@@ -1,9 +1,9 @@
 //! Example communication with this service
 
-use chrono::Utc;
 use hyper::{Body, Client, Method, Request, Response};
 use hyper::{Error, StatusCode};
-use svc_template_rust_client_rest::types::*;
+use lib_common::grpc::get_endpoint_from_env;
+use svc_contact_client_rest::types::*;
 
 fn evaluate(resp: Result<Response<Body>, Error>, expected_code: StatusCode) -> (bool, String) {
     let mut ok = true;
@@ -28,10 +28,11 @@ fn evaluate(resp: Result<Response<Body>, Error>, expected_code: StatusCode) -> (
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("NOTE: Ensure the server is running, or this example will fail.");
 
-    let rest_port = std::env::var("HOST_PORT_REST").unwrap_or_else(|_| "8000".to_string());
+    let (host, port) = get_endpoint_from_env("SERVER_HOSTNAME", "SERVER_PORT_REST");
+    let url = format!("http://{host}:{port}");
 
-    // let host_port = env!("HOST_PORT");
-    let url = format!("http://0.0.0.0:{rest_port}");
+    println!("Rest endpoint set to [{url}].");
+
     let mut ok = true;
     let client = Client::builder()
         .pool_idle_timeout(std::time::Duration::from_secs(10))
@@ -39,13 +40,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // POST /template/example
     {
-        let data = ExampleRequest {
-            id: "abcdef12".to_string(),
-            timestamp: Utc::now(),
+        let data = SignupRequest {
+            display_name: "abcdef12".to_string(),
+            email: "example@aetheric.nl".to_string(),
         };
 
         let data_str = serde_json::to_string(&data).unwrap();
-        let uri = format!("{}/template/example", url);
+        let uri = format!("{}/contact/signup", url);
         let req = Request::builder()
             .method(Method::POST)
             .uri(uri.clone())
