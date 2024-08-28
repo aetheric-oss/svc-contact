@@ -43,6 +43,10 @@ See the High-Level Services ICD.
 
 See our [public documentation](https://www.arrowair.com/docs/documentation/services/api/rest/develop#tag/svc-contact) for a full API.
 
+| HTTP Method | Description |
+| --- | --- |
+| POST | Given an email and display name, create a user record in svc-storage. See the SignupRequest body.
+
 ## gRPC
 
 ### Files
