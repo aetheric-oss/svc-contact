@@ -20,8 +20,6 @@ use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 
 /// Starts the REST API server for this microservice
-#[cfg(not(tarpaulin_include))]
-// no_coverage: (Rnever) not unit testable, only integration tests
 pub async fn rest_server(
     config: Config,
     shutdown_rx: Option<tokio::sync::oneshot::Receiver<()>>,
@@ -100,5 +98,32 @@ pub async fn rest_server(
             rest_error!("could not start server: {}", e);
             Err(())
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_server_start_and_shutdown() {
+        use tokio::time::{sleep, Duration};
+        lib_common::logger::get_log_handle().await;
+        ut_info!("start");
+
+        let config = Config::default();
+
+        let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
+
+        // Start the rest server
+        tokio::spawn(rest_server(config, Some(shutdown_rx)));
+
+        // Give the server time to get through the startup sequence (and thus code)
+        sleep(Duration::from_secs(1)).await;
+
+        // Shut down server
+        assert!(shutdown_tx.send(()).is_ok());
+
+        ut_info!("success");
     }
 }

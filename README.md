@@ -94,7 +94,7 @@ There are additional make targets available. You can find all possible targets b
 
 ## :scroll: Documentation
 The following documents are relevant to this service:
-- :construction: Requirements & User Stories
+- [Login Specification](https://docs.google.com/document/d/1Ndw5o9SMrSq2a-WO1v_gadSnrwQMAu0fqAH3SiQ8Ir0/edit#heading=h.aczyuw2yex2w)
 - [Concept of Operations](./docs/conops.md)
 - [Software Design Document](./docs/sdd.md)
 - [Interface Control Document (ICD)](./docs/icd.md)

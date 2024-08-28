@@ -51,17 +51,6 @@ pub async fn health_check(
     Ok(())
 }
 
-impl From<SignupRequest> for user::Data {
-    fn from(req: SignupRequest) -> Self {
-        user::Data {
-            // TODO(R5): Update this with the right auth method
-            auth_method: user::AuthMethod::Local.into(),
-            display_name: req.display_name,
-            email: req.email,
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
